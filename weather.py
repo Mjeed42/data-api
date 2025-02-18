@@ -2,26 +2,17 @@
 """
 This module provides functionality to search for a city and retrieve its
 weather forecast.
-It uses the Le Wagon Weather API to fetch data.
 """
-
 import sys
 import requests
 
 BASE_URI = "https://weather.lewagon.com"
-
 
 def search_city(query):
     '''
     Look for a given city. If multiple options are returned, have the user
     choose between them.
     Return one city (or None).
-
-    Args:
-        query (str): The city name to search for.
-
-    Returns:
-        dict: A dictionary containing city information or None if not found.
     '''
     url = f"{BASE_URI}/geo/1.0/direct?q={query}&limit=5"
     response = requests.get(url).json()
@@ -40,18 +31,10 @@ def search_city(query):
     choice = int(input("Which city did you mean?\n> ")) - 1
     return response[choice]
 
-
 def weather_forecast(lat, lon):
     '''
     Return a 5-day weather forecast for the city,
     given its latitude and longitude.
-
-    Args:
-        lat (float): Latitude of the city.
-        lon (float): Longitude of the city.
-
-    Returns:
-        list: A list of dictionaries containing weather forecast data.
     '''
     forecast_url = f"{BASE_URI}/data/2.5/forecast?lat={lat}&lon={lon}&limit=5"
     forecast_response = requests.get(forecast_url).json()
@@ -62,7 +45,6 @@ def weather_forecast(lat, lon):
         weather = forecast['weather'][0]['description']
         temp = forecast['main']['temp_max']
 
-        # Only keep one forecast per day
         if not forecasts or forecasts[-1]['date'] != date:
             forecasts.append({
                 'date': date,
@@ -85,7 +67,6 @@ def main():
                   Max Temp: {forecast['temp']}°C""")
     else:
         print("No city selected.")
-
 
 if __name__ == '__main__':
     try:
