@@ -1,9 +1,7 @@
 # pylint: disable=missing-docstring,invalid-name
-
 """
 This module tests the functionality of the Le Wagon Weather API by fetching city data.
 """
-
 import requests
 
 def fetch_city_data(city_name):
