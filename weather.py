@@ -1,7 +1,11 @@
 # pylint: disable=missing-module-docstring
+"""
+This module provides functionality to search for a city and retrieve its
+weather forecast.
+It uses the Le Wagon Weather API to fetch data.
+"""
 
 import sys
-import urllib.parse
 import requests
 
 BASE_URI = "https://weather.lewagon.com"
@@ -9,22 +13,79 @@ BASE_URI = "https://weather.lewagon.com"
 
 def search_city(query):
     '''
-    Look for a given city. If multiple options are returned, have the user choose between them.
-    Return one city (or None)
+    Look for a given city. If multiple options are returned, have the user
+    choose between them.
+    Return one city (or None).
+
+    Args:
+        query (str): The city name to search for.
+
+    Returns:
+        dict: A dictionary containing city information or None if not found.
     '''
-    pass  # YOUR CODE HERE
+    url = f"{BASE_URI}/geo/1.0/direct?q={query}&limit=5"
+    response = requests.get(url).json()
+
+    if not response:
+        print("City not found. Please try again.")
+        return None
+
+    if len(response) == 1:
+        return response[0]
+
+    print("Multiple matches found:")
+    for i, city in enumerate(response, start=1):
+        print(f"{i}. {city['name']}, {city.get('country', 'N/A')}")
+
+    choice = int(input("Which city did you mean?\n> ")) - 1
+    return response[choice]
+
 
 def weather_forecast(lat, lon):
-    '''Return a 5-day weather forecast for the city, given its latitude and longitude.'''
-    pass  # YOUR CODE HERE
+    '''
+    Return a 5-day weather forecast for the city,
+    given its latitude and longitude.
+
+    Args:
+        lat (float): Latitude of the city.
+        lon (float): Longitude of the city.
+
+    Returns:
+        list: A list of dictionaries containing weather forecast data.
+    '''
+    forecast_url = f"{BASE_URI}/data/2.5/forecast?lat={lat}&lon={lon}&limit=5"
+    forecast_response = requests.get(forecast_url).json()
+    forecasts = []
+
+    for forecast in forecast_response['list']:
+        date = forecast['dt_txt'].split()[0]
+        weather = forecast['weather'][0]['description']
+        temp = forecast['main']['temp_max']
+
+        # Only keep one forecast per day
+        if not forecasts or forecasts[-1]['date'] != date:
+            forecasts.append({
+                'date': date,
+                'weather': weather,
+                'temp': temp
+            })
+
+    return forecasts
 
 def main():
     '''Ask user for a city and display weather forecast'''
     query = input("City?\n> ")
     city = search_city(query)
 
-    # TODO: Display weather forecast for a given city
-    pass  # YOUR CODE HERE
+    if city:
+        lat, lon = city['lat'], city['lon']
+        forecasts = weather_forecast(lat, lon)
+        for forecast in forecasts:
+            print(f"""Date: {forecast['date']}, Weather: {forecast['weather']},
+                  Max Temp: {forecast['temp']}°C""")
+    else:
+        print("No city selected.")
+
 
 if __name__ == '__main__':
     try:
